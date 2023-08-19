@@ -1,0 +1,77 @@
+---
+title: "Flextable Learning"
+date: '`r format(Sys.Date(), "%Y-%m-%d")`'
+output:
+  html_document:
+    code_folding: hide
+    theme: flat
+    toc: yes
+    toc_depth: 5
+    toc_float:
+      collapsed: no
+  pdf_document:
+    toc: yes
+    toc_depth: '5'
+editor_options:
+  chunk_output_type: console
+---
+
+# Library
+```{r}
+library(tidyverse)
+library(flextable)
+library(officer)
+```
+
+# Intro
+flextable rendered in HTML
+```{r}
+ft <- flextable(airquality[sample.int(10), ])
+ft <- add_header_row(ft,
+                     colwidths = c(4, 2),
+                     values = c("Air quality", "Time"))
+
+
+ft <- theme_vanilla(ft)
+ft <- add_footer_lines(ft, "Daily air quality measurements in New York, May to September 1973.")
+ft <- color(ft, part = "footer", color = "#666666")
+ft <- set_caption(ft, caption = "New York Air Quality Measurements")
+ft
+```
+
+```{r}
+# Define formatting properties such as font, border color, number of decimals
+set_flextable_defaults(font.size = 10, theme_fun = theme_vanilla,
+                       padding = 6, background.color = "#EFEFEF")
+
+flextable(head(mtcars))
+```
+
+# An example
+```{r}
+# create a flextable
+myft <- flextable(head(mtcars),
+                  col_keys = c("am", "carb", "gear", "mpg", "drat"))
+myft
+
+# conditional formatting
+myft <- italic(myft, j = 3) # j denotes column; italicize the 3rd column, excluding header
+
+# when drat > 3.5, set the drat values to be red and bold the drat values
+myft <- color(myft, ~ drat > 3.5, ~ drat, color = "red")
+myft <- bold(myft, ~ drat > 3.5, ~ drat, bold = TRUE)
+myft
+
+# add or change header/footer rows
+# change cells height and width and merge cells
+myft <- add_header_row(
+  x = myft, values = c("some measures", "other measures"),
+  colwidths = c(3, 2)
+)
+# i denotes row; put the 1st header row center
+myft <- align(x = myft, i = 1, part = "header", align = "center")
+
+myft
+
+```
+
