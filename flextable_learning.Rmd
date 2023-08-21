@@ -52,7 +52,7 @@ flextable(head(mtcars))
 # create a flextable
 myft <- flextable(head(mtcars),
                   col_keys = c("am", "carb", "gear", "mpg", "drat"))
-myft
+
 
 # conditional formatting
 myft <- italic(myft, j = 3) # j denotes column; italicize the 3rd column, excluding header
@@ -71,7 +71,153 @@ myft <- add_header_row(
 # i denotes row; put the 1st header row center
 myft <- align(x = myft, i = 1, part = "header", align = "center")
 
+myft <- theme_vanilla(myft)
 myft
+
+# specify formatting options for the table
+myft <- set_table_properties(myft, align = "right", layout = "autofit")
+myft
+```
+
+# Some default settings
+```{r}
+get_flextable_defaults()
+set_flextable_defaults(font.size = 12, font.family = "Open Sans",
+                       font.color = "#333333", table.layout = "fixed",
+                       border.color = "gray", padding.top = 3,
+                       padding.bottom = 3, padding.left = 4, padding.right = 4)
+
+dat <- data.frame(
+  wool = c("A", "B"),
+  L = c(44.56, 28.22), 
+  M = c(24, 28.77), 
+  H = c(24.56, 18.78)
+)
+
+flextable(dat)
+
+# reset to default
+init_flextable_defaults()
+```
+
+```{r}
+flextable(dat) |> font(part = "all", fontname = "Verdana")
+
+set_flextable_defaults(font.family = "Verdana")
+
+flextable(dat)
+
+set_flextable_defaults(font.family = "Verdana",
+                       font.size = 11,
+                       padding = 2,
+                       border.color = "#CCCCCC",
+                       line_spacing = 1.3)
+
+```
+
+```{r}
+set_flextable_defaults(digits = 2,
+                       decimal.mark = ",")
+
+head(airquality) |> 
+  mutate(rnum = runif(6, min = 1000000, max = 210000000)) |> 
+  qflextable() |> 
+  colformat_double() |> 
+  autofit() |> 
+  align(part = "all", align = "center")
+
+flextable(airquality)
+```
+
+# Table design
+header
+body
+footer
+```{r}
+ft <- flextable(head(airquality))
+ft
+
+flextable(head(airquality)) |> 
+  add_header_row(values = c("air quality", "time"), colwidths = c(4, 2)) |> 
+  add_footer_lines("hello note")
+
+# blank columns can be used as separators
+myft <- flextable(head(airquality), col_keys = c("Ozone", "Solar.R", "col1", "Month", "Day")) |> 
+  width(j = "col1", width = 0.2) |> 
+  empty_blanks()# make blank column as transparent
+
+# conditional formatting
+library(grid)
+myft |> 
+  append_chunks(i = ~ Ozone < 30, j = "col1",
+                as_chunk(";)", props = fp_text_default(color = "#ec11c2")))
+
+```
+
+A cell can contain plots
+```{r}
+as.data.ta
+z <- as.data.table(ggplot2::diamonds)
+z <- z[, list(
+  price = mean(price, na.rm = TRUE),
+  list_col = list(.SD$x)
+), by = "cut"]
+
+# flextable ----
+ft <- flextable(data = z) %>%
+  mk_par(j = "list_col", value = as_paragraph(
+    plot_chunk(value = list_col, type = "dens", col = "#ec11c2", 
+               width = 1.5, height = .4, free_scale = TRUE)
+  )) %>%
+  colformat_double(big.mark = ",", prefix = " $") %>% 
+  set_header_labels(box = "composite content", density = "density") %>% 
+  autofit()
+
+```
+
+# Selector
+```{r}
+dat <- head(diamonds, n = 10)
+flextable(dat) |> 
+  color(~ price < 330, color = "orange", ~ price + x + y +  z) |> 
+  color(~ carat > .24, color = "red", ~ cut)
+
+# select certain rows and columns to color
+flextable(dat) |> 
+  color(i = ~ cut %in% "Premium",
+        j = ~ x + y, color = "red")
+
+flextable(dat) |> 
+  color(j = c("x", "y"), color = "orange", part = "all") |> 
+  bold(j = c("price", "x"), bold = TRUE)
+
+flextable(dat) |> 
+  color(i = 1:3, j = 1:3, color = "orange")
+
+flextable(dat) |> 
+  color(i = rep(c(TRUE, FALSE), 5), color = "orange")
+
+# add a vertical line
+border <- fp_border_default()
+flextable(dat) |> 
+  vline(j = c("clarity", "price"), border = border, part = "all")
+
+flextable(dat) |> 
+  vline(j = c("clarity", "price"), border = fp_border_default(), part = "all")
+
+# change color only on the header
+flextable(dat) |> 
+  color(i = 1, color = "red", part = "header")
+
+# change background color based on condition
+flextable(dat) |> 
+  bg(i = ~ price < 335, j = c("x", "y", "z"),
+     bg = "orange")
+
+``` 
+
+# Rendering
+```{r}
 
 ```
 
