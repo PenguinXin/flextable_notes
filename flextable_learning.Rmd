@@ -15,7 +15,7 @@ output:
 editor_options:
   chunk_output_type: console
 ---
-
+https://ardata-fr.github.io/flextable-book/index.html
 # Library
 ```{r}
 library(tidyverse)
@@ -218,6 +218,15 @@ flextable(dat) |>
 
 # Rendering
 ```{r}
+# produce a PowerPoint document
+ft1 <- qflextable(head(airquality))
+ft2 <- as_flextable(cars)
 
+ppt <- read_pptx() |> 
+  add_slide(layout = "Title and Content", master = "Office Theme") |> 
+  ph_with(value = ft1, location = ph_location_left()) |> 
+  ph_with(value = ft2, location = ph_location_right())
+
+print(ppt, target = "example_table_powerpoint.pptx")
 ```
 
